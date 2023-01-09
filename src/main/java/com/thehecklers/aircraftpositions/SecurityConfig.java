@@ -1,49 +1,28 @@
 package com.thehecklers.aircraftpositions;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.web.reactive.function.client.WebClient;
 
-@EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
-    private final PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+/**
+ * Add WebClient OAuth2 support
+ */
+@Configuration
+public class SecurityConfig {
 
     @Bean
-    UserDetailsService authentication() {
-        UserDetails sasha = User.builder()
-                .username("sasha")
-                .password(passwordEncoder.encode("sasha"))
-                .roles("USER", "ADMIN")
+    WebClient client(ClientRegistrationRepository regRepo, OAuth2AuthorizedClientRepository clientRepository) {
+        ServletOAuth2AuthorizedClientExchangeFilterFunction filter =
+                new ServletOAuth2AuthorizedClientExchangeFilterFunction(regRepo, clientRepository);
+
+        filter.setDefaultOAuth2AuthorizedClient(true);
+
+        return WebClient.builder()
+                .baseUrl("http://localhost:7634")
+                .apply(filter.oauth2Configuration())
                 .build();
-
-        UserDetails masha = User.builder()
-                .username("masha")
-                .password(passwordEncoder.encode("masha"))
-                .roles("USER")
-                .build();
-
-        System.out.println(" >>> Sasha's password: " + sasha.getPassword());
-        System.out.println(" >>> Masha's password: " + masha.getPassword());
-
-        return new InMemoryUserDetailsManager(sasha, masha);
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .mvcMatchers("/aircraftadmin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-                .and()
-                .formLogin()
-                .and()
-                .httpBasic();
     }
 }

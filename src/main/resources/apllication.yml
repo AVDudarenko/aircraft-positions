@@ -1,0 +1,12 @@
+#spring:
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          okta:
+#            client-id: <идентификатор_назначенного_клиента>
+#              client-secret: <секрет_назначенного_клиента>
+#              provider:
+#                okta:
+#                  issuer-uri: https://<назначенный_поддомен>
+#                    .oktapreview.com/oauth2/default

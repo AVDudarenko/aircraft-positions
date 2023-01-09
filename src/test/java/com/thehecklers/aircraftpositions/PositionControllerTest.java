@@ -24,6 +24,8 @@ class PositionControllerTest {
     private PositionRetriever retriever;
     private Aircraft ac1, ac2;
 
+    private String endpoint = "aircraftadmin";
+
     @BeforeEach
     void setUp(ApplicationContext context) {
         // Рейс 001 компании Spring Airlines по пути из STL в SFO
@@ -45,7 +47,7 @@ class PositionControllerTest {
                 true, false,
                 Instant.now(), Instant.now(), Instant.now());
 
-        Mockito.when(retriever.retrieveAircraftPositions())
+        Mockito.when(retriever.retrieveAircraftPositions(endpoint))
                 .thenReturn(List.of(ac1, ac2));
     }
 
